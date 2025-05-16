@@ -1,6 +1,5 @@
 package com.lagradost.cloudstream3.extractors
 
-import android.util.Log
 import com.lagradost.cloudstream3.SubtitleFile
 import com.lagradost.cloudstream3.mvvm.logError
 import com.lagradost.cloudstream3.utils.ExtractorApi
@@ -18,7 +17,7 @@ class YoutubeShortLinkExtractor : YoutubeExtractor() {
     override val mainUrl = "https://youtu.be"
 
     override fun getExtractorUrl(id: String): String {
-        Log.d("YoutubeShortLinkExtractor: Generating URL for ID: $id")
+        logError(Exception("YoutubeShortLinkExtractor: Generating URL for ID: $id"))
         return "$mainUrl/$id"
     }
 }
@@ -42,7 +41,7 @@ open class YoutubeExtractor : ExtractorApi() {
     }
 
     override fun getExtractorUrl(id: String): String {
-        Log.d("YoutubeExtractor: Generating URL for ID: $id")
+        logError(Exception("YoutubeExtractor: Generating URL for ID: $id"))
         return "$mainUrl/watch?v=$id"
     }
 
@@ -52,13 +51,13 @@ open class YoutubeExtractor : ExtractorApi() {
         subtitleCallback: (SubtitleFile) -> Unit,
         callback: (ExtractorLink) -> Unit
     ) {
-        Log.d("YoutubeExtractor: Starting extraction for URL: $url, Referer: $referer")
+        logError(Exception("YoutubeExtractor: Starting extraction for URL: $url, Referer: $referer"))
 
         try {
             if (!ytVideos.containsKey(url) || ytVideos[url].isNullOrEmpty()) {
-                Log.d("YoutubeExtractor: Cache miss for URL: $url, fetching new data")
+                logError(Exception("YoutubeExtractor: Cache miss for URL: $url, fetching new data"))
                 val link = YoutubeStreamLinkHandlerFactory.getInstance().fromUrl(url)
-                Log.d("YoutubeExtractor: Parsed link with ID: ${link.id}")
+                logError(Exception("YoutubeExtractor: Parsed link with ID: ${link.id}"))
 
                 val s = object : YoutubeStreamExtractor(
                     ServiceList.YouTube,
@@ -66,23 +65,23 @@ open class YoutubeExtractor : ExtractorApi() {
                 ) {}
                 s.fetchPage()
                 ytVideos[url] = s.hlsUrl
-                Log.d("YoutubeExtractor: Stored HLS URL for $url: ${s.hlsUrl}")
+                logError(Exception("YoutubeExtractor: Stored HLS URL for $url: ${s.hlsUrl}"))
 
                 ytVideosSubtitles[url] = try {
                     val subtitles = s.subtitlesDefault.filterNotNull()
-                    Log.d("YoutubeExtractor: Found ${subtitles.size} subtitles for URL: $url")
+                    logError(Exception("YoutubeExtractor: Found ${subtitles.size} subtitles for URL: $url"))
                     subtitles
                 } catch (e: Exception) {
                     logError(e)
-                    Log.d("YoutubeExtractor: Error fetching subtitles for URL: $url, Error: ${e.message}")
+                    logError(Exception("YoutubeExtractor: Error fetching subtitles for URL: $url, Error: ${e.message}"))
                     emptyList()
                 }
             } else {
-                Log.d("YoutubeExtractor: Cache hit for URL: $url, using cached HLS URL")
+                logError(Exception("YoutubeExtractor: Cache hit for URL: $url, using cached HLS URL"))
             }
 
             ytVideos[url]?.let {
-                Log.d("YoutubeExtractor: Invoking callback with HLS URL: $it")
+                logError(Exception("YoutubeExtractor: Invoking callback with HLS URL: $it"))
                 callback(
                     newExtractorLink(
                         source = this.name,
@@ -91,27 +90,27 @@ open class YoutubeExtractor : ExtractorApi() {
                         type = ExtractorLinkType.M3U8
                     )
                 )
-            } ?: Log.d("YoutubeExtractor: No HLS URL found for $url")
+            } ?: logError(Exception("YoutubeExtractor: No HLS URL found for $url"))
 
             ytVideosSubtitles[url]?.mapNotNull {
                 if (it.languageTag == null || it.content == null) {
-                    Log.d("YoutubeExtractor: Skipping invalid subtitle for URL: $url, Language: ${it.languageTag}")
+                    logError(Exception("YoutubeExtractor: Skipping invalid subtitle for URL: $url, Language: ${it.languageTag}"))
                     null
                 } else {
-                    Log.d("YoutubeExtractor: Processing subtitle for URL: $url, Language: ${it.languageTag}")
+                    logError(Exception("YoutubeExtractor: Processing subtitle for URL: $url, Language: ${it.languageTag}"))
                     SubtitleFile(
                         it.languageTag,
                         it.content
                     )
                 }
             }?.forEach {
-                Log.d("YoutubeExtractor: Invoking subtitle callback for language: ${it.lang}")
+                logError(Exception("YoutubeExtractor: Invoking subtitle callback for language: ${it.lang}"))
                 subtitleCallback(it)
-            } ?: Log.d("YoutubeExtractor: No subtitles found for URL: $url")
+            } ?: logError(Exception("YoutubeExtractor: No subtitles found for URL: $url"))
 
         } catch (e: Exception) {
             logError(e)
-            Log.d("YoutubeExtractor: Error during extraction for URL: $url, Error: ${e.message}")
+            logError(Exception("YoutubeExtractor: Error during extraction for URL: $url, Error: ${e.message}"))
         }
     }
 }
