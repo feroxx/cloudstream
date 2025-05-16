@@ -64,8 +64,13 @@ open class YoutubeExtractor : ExtractorApi() {
                     link
                 ) {}
                 s.fetchPage()
-                ytVideos[url] = s.hlsUrl
-                logError(Exception("YoutubeExtractor: Stored HLS URL for $url: ${s.hlsUrl}"))
+        // HLS URL boşsa, dash manifest URL'yi kullan
+        val streamUrl = s.hlsUrl.takeIf { !it.isNullOrEmpty() }
+            ?: s.dashMpdUrl.takeIf { !it.isNullOrEmpty() }
+
+        if (!streamUrl.isNullOrEmpty()) {
+            ytVideos[url] = streamUrl
+        }
 
                 ytVideosSubtitles[url] = try {
                     val subtitles = s.subtitlesDefault.filterNotNull()
