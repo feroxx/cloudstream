@@ -67,6 +67,7 @@ open class YoutubeExtractor : ExtractorApi() {
         // HLS URL boşsa, dash manifest URL'yi kullan
         val streamUrl = s.hlsUrl.takeIf { !it.isNullOrEmpty() }
             ?: s.dashMpdUrl.takeIf { !it.isNullOrEmpty() }
+            ?: s.videoStreams?.firstOrNull()?.url
 
         if (!streamUrl.isNullOrEmpty()) {
             ytVideos[url] = streamUrl
