@@ -93,7 +93,7 @@ open class YoutubeExtractor : ExtractorApi() {
                         source = this.name,
                         name = this.name,
                         url = it,
-                        type = ExtractorLinkType.M3U8
+                        type = INFER_TYPE
                     )
                 )
             } ?: logError(Exception("YoutubeExtractor: No HLS URL found for $url"))
